@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using StackExchange.Redis;
 
 namespace RedisTestBed.RedisProvider
@@ -16,6 +17,11 @@ namespace RedisTestBed.RedisProvider
         public void SetDatabase(IDatabase database)
         {
             this.Executor = database;
+        }
+
+        public Task<bool> Exists()
+        {
+            return this.Executor.KeyExistsAsync(this.Key);
         }
     }
 }

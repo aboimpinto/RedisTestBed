@@ -12,17 +12,16 @@ namespace RedisTestBed
     {
         static async Task Main(string[] args)
         {
-            // var redis = ConnectionMultiplexer.Connect(
-            //     new ConfigurationOptions{
-            //         EndPoints = {"localhost:6379"}                
-            //     });
-
             var connector = new RedisConnector("127.0.0.1:6379,abortConnect=false");
             var container = new RedisContainer(connector, "TestBed");
             
+            var incrementalUser = await container.CreateRedisIncrementalItem("incrementalUserId");
             var nextUserId = container.CreateRedisItem<long>("nextUserId");
             var nextProfileId = container.CreateRedisItem<long>("nextProfileId");
             
+            var nextIncrementalUserId = await incrementalUser.Increment();
+            Console.WriteLine(nextIncrementalUserId);
+
             await nextUserId.Set(28);
             await nextProfileId.Set(1);
 
@@ -34,6 +33,7 @@ namespace RedisTestBed
             };
             var user = container.CreateRedisItem<User>("Users");
             await user.Set(user1);
+
 
             // var value = await nextUserId.Get();
 
