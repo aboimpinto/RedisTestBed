@@ -34,40 +34,17 @@ namespace RedisTestBed
             var user = container.CreateRedisItem<User>("Users");
             await user.Set(user1);
 
+            var channelName = "messages";
+            var messagesChannelSubscriber = container.CreateSubscriber(channelName, message => 
+            {
+                Console.WriteLine($"Notification received: {message}");
+            });
 
-            // var value = await nextUserId.Get();
+            var messagesChannelPublisher = container.CreatePublisher(channelName);
+            messagesChannelPublisher.Publish("this is my message");
 
-            // var db = redis.GetDatabase();
-            // var pong = await db.PingAsync();
-            // Console.WriteLine(pong);
 
-            
-
-            // await db.StringSetAsync(new RedisKey("User:PauloAboimPinto:Name"), new RedisValue("Paulo Aboim Pinto"));
-            // await db.StringSetAsync(new RedisKey("User:PauloAboimPinto:DateOfBirth"), new RedisValue("28.08.1974"));
-
-            // var result = await db.StringGetAsync(new RedisKey("User:PauloAboimPinto:Name"));
-            // Console.WriteLine(result);
-
-            // var user1 = new User
-            // {
-            //     Id = 1,
-            //     FirstName = "Paulo",
-            //     LastName = "Pinto"
-            // };
-            // // await connector.SetObjectAsync<User>(1, user1);
-            // await connector.AddToListAsync<User>("Users", 1, user1);
-
-            // var user2 = new User
-            // {
-            //     Id = 2,
-            //     FirstName = "Sophia",
-            //     LastName = "Walker"
-            // };
-            // // await connector.SetObjectAsync<User>(2, user2);
-            // await connector.AddToListAsync<User>("Users", 2, user2);
-
-            // // var result = await connector.GetObjectAsync<User>(2);
+            Console.ReadLine();
 
         }
     }

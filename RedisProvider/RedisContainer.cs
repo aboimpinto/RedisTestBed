@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using static StackExchange.Redis.RedisChannel;
 
 namespace RedisTestBed.RedisProvider
 {
     public class RedisContainer
     {
         private IDictionary<string, RedisObject> _trackedObjects;
+
+        private ConnectionMultiplexer _multiplexer;
 
         public IDatabase Database { get; private set; }
 
@@ -16,6 +19,7 @@ namespace RedisTestBed.RedisProvider
         public RedisContainer(RedisConnector connector, string keyNameSpace = "")
         {
             this.Database = connector.CurrentDatabase;
+            this._multiplexer = connector.ConnectionMultiplexer;
             this.KeyNameSpace = keyNameSpace;
 
             this._trackedObjects = new Dictionary<string, RedisObject>();
@@ -57,6 +61,24 @@ namespace RedisTestBed.RedisProvider
             }
 
             this._trackedObjects.Add(fullName, instance);
+            return instance;
+        }
+
+        public RedisSubscriber CreateSubscriber(string channelName, Action<string> handler, PatternMode patternMode = RedisChannel.PatternMode.Literal)
+        {
+            var instance = Activator.CreateInstance(typeof(RedisSubscriber)) as RedisSubscriber;
+            instance.SetConnectionMultiplexer(this._multiplexer);
+            instance.InitializeSubscriber(channelName, handler, patternMode);
+
+            return instance;
+        }
+
+        public RedisPublisher CreatePublisher(string channelName)
+        {
+            var instance = Activator.CreateInstance(typeof(RedisPublisher)) as RedisPublisher;
+            instance.SetConnectionMultiplexer(this._multiplexer);
+            instance.SetChannelName(channelName);
+
             return instance;
         }
 

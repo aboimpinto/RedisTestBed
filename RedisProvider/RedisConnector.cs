@@ -10,6 +10,8 @@ namespace RedisTestBed.RedisProvider
 
         public IDatabase CurrentDatabase => this._lazyConnectionMultiplexer.Value.GetDatabase(this._databaseId);
 
+        public ConnectionMultiplexer ConnectionMultiplexer => this._lazyConnectionMultiplexer.Value;
+
         public RedisConnector(string configuration, int databaseId = 0)
         {
             this._lazyConnectionMultiplexer = new Lazy<ConnectionMultiplexer>(() => 
