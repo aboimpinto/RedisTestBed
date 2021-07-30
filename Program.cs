@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using RedisTestBed.Model;
 using RedisTestBed.RedisProvider;
-using StackExchange.Redis;
 
 // https://www.codeproject.com/Articles/5269781/RedisProvider-for-NET
 
@@ -35,19 +34,19 @@ namespace RedisTestBed
             await user.Set(user1);
 
             var channelName = "messages";
-            var messagesChannelSubscriber = container.CreateSubscriber(channelName, message => 
-            {
-                Console.WriteLine($"Notification received: {message}");
-            });
+            var channelSubscriber = container
+                .CreateChannelStreamer(channelName)
+                .Subscribe(x => 
+                {
+                    Console.WriteLine($"Notification Received: {x}");
+                });
 
             var messagesChannelPublisher = container.CreatePublisher(channelName);
             messagesChannelPublisher.Publish("this is my message");
 
 
             Console.ReadLine();
-
+            channelSubscriber.Dispose();
         }
     }
-
-    
 }

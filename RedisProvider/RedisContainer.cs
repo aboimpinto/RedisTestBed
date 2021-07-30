@@ -64,12 +64,18 @@ namespace RedisTestBed.RedisProvider
             return instance;
         }
 
-        public RedisSubscriber CreateSubscriber(string channelName, Action<string> handler, PatternMode patternMode = RedisChannel.PatternMode.Literal)
-        {
-            var instance = Activator.CreateInstance(typeof(RedisSubscriber)) as RedisSubscriber;
-            instance.SetConnectionMultiplexer(this._multiplexer);
-            instance.InitializeSubscriber(channelName, handler, patternMode);
+        // public RedisSubscriber CreateSubscriber(string channelName, Action<string> handler, PatternMode patternMode = RedisChannel.PatternMode.Literal)
+        // {
+        //     var instance = Activator.CreateInstance(typeof(RedisSubscriber), this._multiplexer, channelName) as RedisSubscriber;
+        //     // instance.SetConnectionMultiplexer(this._multiplexer);
+        //     // instance.InitializeSubscriber(channelName, handler, patternMode);
 
+        //     return instance;
+        // }
+
+        public RedisSubscriber CreateChannelStreamer(string channelName)
+        {
+            var instance = Activator.CreateInstance(typeof(RedisSubscriber), this._multiplexer, channelName) as RedisSubscriber;
             return instance;
         }
 

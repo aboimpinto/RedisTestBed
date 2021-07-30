@@ -1,29 +1,24 @@
 using System;
+using System.Reactive.Linq;
 using StackExchange.Redis;
-using static StackExchange.Redis.RedisChannel;
 
 namespace RedisTestBed.RedisProvider
 {
-    public class RedisSubscriber
+    public class RedisSubscriber : IObservable<RedisValue>
     {
-        private ConnectionMultiplexer _multiplexer;
+        private IObservable<RedisValue> _channelStream;
 
-        public void SetConnectionMultiplexer(ConnectionMultiplexer multiplexer)
+        public RedisSubscriber(ConnectionMultiplexer multiplexer, string channelName)
         {
-            this._multiplexer = multiplexer;
+            this._channelStream = multiplexer
+                .GetSubscriber()
+                .WhenNotified(channelName);
         }
 
-        public void InitializeSubscriber(string channelName, Action<string> handler, PatternMode patternMode = RedisChannel.PatternMode.Literal)
+        public IDisposable Subscribe(IObserver<RedisValue> observer)
         {
-            var subscriber = this._multiplexer.GetSubscriber();
-            
-            subscriber.Subscribe(new RedisChannel(channelName, patternMode), (channel, message) => 
-            {
-                if (handler != null)
-                {
-                    handler(message);
-                }
-            });
+            return this._channelStream
+                .Subscribe(message => observer.OnNext(message));
         }
     }
 }
