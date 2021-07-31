@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RedisTestBed.Model;
 using RedisTestBed.RedisProvider;
 
 // https://www.codeproject.com/Articles/5269781/RedisProvider-for-NET
+// https://stackoverflow.com/questions/40789943/observable-stream-from-stackexchange-redis-pub-sub-subscription
 
 namespace RedisTestBed
 {
@@ -34,19 +36,58 @@ namespace RedisTestBed
             await user.Set(user1);
 
             var channelName = "messages";
-            var channelSubscriber = container
+            var channelSubscriber1 = container
                 .CreateChannelStreamer(channelName)
                 .Subscribe(x => 
                 {
-                    Console.WriteLine($"Notification Received: {x}");
+                    Console.WriteLine($"#1 Notification Received: {x}");
+                    Thread.Sleep(1000);
                 });
 
+            var channelSubscriber2 = container
+                .CreateChannelStreamer(channelName)
+                .Subscribe(x => 
+                {
+                    Console.WriteLine($"#2 Notification Received: {x}");
+                    Thread.Sleep(500);
+                });
+
+
             var messagesChannelPublisher = container.CreatePublisher(channelName);
-            messagesChannelPublisher.Publish("this is my message");
+            messagesChannelPublisher.Publish("Message: 1");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 2");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 3");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 4");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 5");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 6");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 7");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 8");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 9");
+            Thread.Sleep(250);
+
+            messagesChannelPublisher.Publish("Message: 10");
+            Thread.Sleep(250);
 
 
             Console.ReadLine();
-            channelSubscriber.Dispose();
+            channelSubscriber1.Dispose();
+            channelSubscriber2.Dispose();
         }
     }
 }
