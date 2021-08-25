@@ -64,16 +64,7 @@ namespace RedisTestBed.RedisProvider
             return instance;
         }
 
-        // public RedisSubscriber CreateSubscriber(string channelName, Action<string> handler, PatternMode patternMode = RedisChannel.PatternMode.Literal)
-        // {
-        //     var instance = Activator.CreateInstance(typeof(RedisSubscriber), this._multiplexer, channelName) as RedisSubscriber;
-        //     // instance.SetConnectionMultiplexer(this._multiplexer);
-        //     // instance.InitializeSubscriber(channelName, handler, patternMode);
-
-        //     return instance;
-        // }
-
-        public RedisSubscriber CreateChannelStreamer(string channelName)
+        public RedisSubscriber CreateSubscriber(string channelName)
         {
             var instance = Activator.CreateInstance(typeof(RedisSubscriber), this._multiplexer, channelName) as RedisSubscriber;
             return instance;
@@ -84,6 +75,40 @@ namespace RedisTestBed.RedisProvider
             var instance = Activator.CreateInstance(typeof(RedisPublisher)) as RedisPublisher;
             instance.SetConnectionMultiplexer(this._multiplexer);
             instance.SetChannelName(channelName);
+
+            return instance;
+        }
+
+        // public async Task<RedisStreamGroupReader> CreateSteamGroupReader(string channelName, string group, string consumer)
+        // {
+        //     var instance = Activator.CreateInstance(typeof(RedisStreamGroupReader), channelName, group, consumer) as RedisStreamGroupReader;
+        //     instance.SetDatabase(this.Database);
+        //     await instance.CreateStreamGroup().ConfigureAwait(false);
+
+        //     return instance;
+        // }
+
+        // public RedisStreamPublisher<T> CreateStreamPublisher<T>(string channelName)
+        // {
+        //     var instance = Activator.CreateInstance(typeof(RedisStreamPublisher<T>), channelName) as RedisStreamPublisher<T>;
+        //     instance.SetDatabase(this.Database);
+
+        //     return instance;
+        // }
+
+        public RedisStreamGroupReader CreateSteamGroupReader(string channelName, string group, string consumer)
+        {
+            var instance = Activator.CreateInstance(typeof(RedisStreamGroupReader), channelName, group, consumer) as RedisStreamGroupReader;
+            instance.SetDatabase(this.Database);
+            instance.CreateStreamGroup();
+
+            return instance;
+        }
+
+        public RedisStreamPublisher<T> CreateStreamPublisher<T>(string channelName)
+        {
+            var instance = Activator.CreateInstance(typeof(RedisStreamPublisher<T>), channelName) as RedisStreamPublisher<T>;
+            instance.SetDatabase(this.Database);
 
             return instance;
         }

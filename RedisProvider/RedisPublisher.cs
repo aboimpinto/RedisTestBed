@@ -1,4 +1,3 @@
-using System;
 using StackExchange.Redis;
 
 namespace RedisTestBed.RedisProvider
@@ -8,17 +7,6 @@ namespace RedisTestBed.RedisProvider
         private ConnectionMultiplexer _multiplexer;
         private string _channelName;
 
-        // public RedisPublisher(ConnectionMultiplexer cm)
-        // {
-        //     this._multiplexer = cm;
-
-        //     var subscriber = this._multiplexer.GetSubscriber();
-
-        //     subscriber.Subscribe(new RedisChannel("messages", RedisChannel.PatternMode.Literal), (channel, message) => 
-        //     {
-        //         Console.WriteLine($"Message received: {message}");
-        //     });
-        // }
         public void SetConnectionMultiplexer(ConnectionMultiplexer multiplexer)
         {
             this._multiplexer = multiplexer;

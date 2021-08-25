@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RedisTestBed.Model;
@@ -11,17 +12,24 @@ namespace RedisTestBed
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             var connector = new RedisConnector("127.0.0.1:6379,abortConnect=false");
             var container = new RedisContainer(connector, "TestBed");
             
-            var incrementalUser = await container.CreateRedisIncrementalItem("incrementalUserId");
+            // await RedisItemExample(container);
+
+            // await IncrementalItemExample(container);
+            
+            StreamExample(container);
+
+            Console.ReadLine();
+        }
+
+        private static async Task RedisItemExample(RedisContainer container)
+        {
             var nextUserId = container.CreateRedisItem<long>("nextUserId");
             var nextProfileId = container.CreateRedisItem<long>("nextProfileId");
-            
-            var nextIncrementalUserId = await incrementalUser.Increment();
-            Console.WriteLine(nextIncrementalUserId);
 
             await nextUserId.Set(28);
             await nextProfileId.Set(1);
@@ -34,60 +42,48 @@ namespace RedisTestBed
             };
             var user = container.CreateRedisItem<User>("Users");
             await user.Set(user1);
+        }
 
-            var channelName = "messages";
-            var channelSubscriber1 = container
-                .CreateChannelStreamer(channelName)
+        private static async Task IncrementalItemExample(RedisContainer container)
+        {
+            var incrementalUser = await container.CreateRedisIncrementalItem("incrementalUserId");
+
+            var nextIncrementalUserId = await incrementalUser.Increment();
+            Console.WriteLine(nextIncrementalUserId);
+        }
+
+        private static async Task StreamExample(RedisContainer container)
+        {
+            var streamChannel = "myChannel";
+            var streamGroup = "ChannelGroup1";
+            var consumer1 = "ChannelConsumer1";
+            var consumer2 = "ChannelConsumer2";
+
+            var cancellationToken = new CancellationTokenSource();
+            var myChannelStreamConsumer1 = container.CreateSteamGroupReader(streamChannel, streamGroup, consumer1);
+            var myChannelStreamConsumer2 = container.CreateSteamGroupReader(streamChannel, streamGroup, consumer2);
+            
+
+            var streamPublisher = container.CreateStreamPublisher<string>(streamChannel);
+            Console.WriteLine(await streamPublisher.Publish("Message1").ConfigureAwait(false));
+            Console.WriteLine(await streamPublisher.Publish("Message2").ConfigureAwait(false));
+            Console.WriteLine(await streamPublisher.Publish("Message3").ConfigureAwait(false));
+
+            var streamGroupReaderSubscriber1 = myChannelStreamConsumer1
+                .CreateObservableStream<string>(cancellationToken.Token)
                 .Subscribe(x => 
                 {
-                    Console.WriteLine($"#1 Notification Received: {x}");
-                    Thread.Sleep(1000);
+                    Console.WriteLine($"--> {consumer1} {x.Id}::{x.Message}");
+                    Thread.Sleep(3000);
                 });
 
-            var channelSubscriber2 = container
-                .CreateChannelStreamer(channelName)
+            var streamGroupReaderSubscriber2 = myChannelStreamConsumer2
+                .CreateObservableStream<string>(cancellationToken.Token)
                 .Subscribe(x => 
                 {
-                    Console.WriteLine($"#2 Notification Received: {x}");
-                    Thread.Sleep(500);
+                    Console.WriteLine($"--> {consumer2} {x.Id}::{x.Message}");
+                    Thread.Sleep(4000);
                 });
-
-
-            var messagesChannelPublisher = container.CreatePublisher(channelName);
-            messagesChannelPublisher.Publish("Message: 1");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 2");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 3");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 4");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 5");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 6");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 7");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 8");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 9");
-            Thread.Sleep(250);
-
-            messagesChannelPublisher.Publish("Message: 10");
-            Thread.Sleep(250);
-
-
-            Console.ReadLine();
-            channelSubscriber1.Dispose();
-            channelSubscriber2.Dispose();
         }
     }
 }
