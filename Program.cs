@@ -12,7 +12,7 @@ namespace RedisTestBed
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var connector = new RedisConnector("127.0.0.1:6379,abortConnect=false");
             var container = new RedisContainer(connector, "TestBed");
@@ -21,7 +21,7 @@ namespace RedisTestBed
 
             // await IncrementalItemExample(container);
             
-            StreamExample(container);
+            await StreamExample(container).ConfigureAwait(false);
 
             Console.ReadLine();
         }
